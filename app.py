@@ -15,7 +15,7 @@ import os
 host = st.secrets.database.host
 port = st.secrets.database.port
 database = st.secrets.database.database
-username = st.secrets.database.username
+username = st.secrets['database']['username']
 password = st.secrets.database.password
 
 # Connect to the database

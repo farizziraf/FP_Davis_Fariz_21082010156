@@ -1,0 +1,15 @@
+streamlit
+pandas
+plotly
+prophet
+matplotlib
+yfinance
+pandas-datareader
+numpy
+datetime
+openpyxl
+pymysql
+SQLAlchemy
+scipy
+gtts
+translators==5.9.2

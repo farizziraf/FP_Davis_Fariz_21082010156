@@ -3,6 +3,7 @@ pandas
 plotly
 prophet
 matplotlib
+seaborn
 yfinance
 pandas-datareader
 numpy

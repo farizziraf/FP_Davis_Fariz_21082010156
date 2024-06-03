@@ -8,7 +8,6 @@ import plotly.graph_objects as go
 import translators as ts
 from gtts import gTTS
 from sqlalchemy import create_engine
-import mplcursors
 import os
 
 # Database AW connection details from secrets

@@ -171,8 +171,11 @@ def distributionaw(engine):
             ),
             tickangle=-45
         ),
-        plot_bgcolor='rgba(0,0,0,0)',  # Transparent background
-        paper_bgcolor='rgba(0,0,0,0)'  # Transparent background
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        font=dict(
+        weight="bold"
+    )
     )
     
     st.plotly_chart(fig)

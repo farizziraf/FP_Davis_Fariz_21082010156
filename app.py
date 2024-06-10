@@ -1,13 +1,9 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-import translators as ts
 from gtts import gTTS
-from sqlalchemy import create_engine
+import mysql.connector
 import os
 
 # Database AW connection details from secrets
@@ -18,218 +14,406 @@ username = st.secrets['database']['username']
 password = st.secrets.database.password
 
 # Connect to the database
-connection_string = f"mysql+pymysql://{username}:{password}@{host}:{port}/{database}"
-engine = create_engine(connection_string)
+conn = mysql.connector.connect(
+    host=host,
+    port=port,
+    database=database,
+    user=username,
+    password=password
+)
 
 # Load the data
 data = pd.read_csv("dataset/imdbscrap.csv", sep=";")
 
 # Comparison
-def comparisonaw(engine):
+def comparisonaw(conn):
+    cursor = conn.cursor()
     query = """
-        SELECT sm.name AS shipping_method,
-        COUNT(sf.shippingMethod_key) AS usage_count
-        FROM sales_fact sf
-        JOIN shipping_method sm ON sf.shippingMethod_key = sm.id
-        GROUP BY sm.name
+        SELECT DepartmentName,
+               COUNT(EmployeeKey) AS employee_count
+        FROM dimemployee
+        GROUP BY DepartmentName
     """
-    df = pd.read_sql(query, engine)
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    df = pd.DataFrame(rows, columns=[desc[0] for desc in cursor.description])
 
-    fig, ax = plt.subplots(figsize=(10, 6))
-    bars = ax.bar(df['shipping_method'], df['usage_count'], color='gold', zorder=2)
-    ax.set_xlabel('Shipping Method', color='white', fontweight='bold', labelpad=20)
-    ax.set_ylabel('Usage Count', color='white', fontweight='bold', labelpad=20)
-    plt.xticks(color='white', fontweight='bold')
-    plt.yticks(color='white', fontweight='bold')
+    # Mengisi nilai yang hilang dengan 0
+    df['employee_count'] = df['employee_count'].fillna(0)
+    
+    fig = px.bar(df, y='DepartmentName', x='employee_count', 
+                 labels={'DepartmentName': 'Department Name', 'employee_count': 'Employee Count'}, 
+                 color_discrete_sequence=['gold'])
 
-    # Set the color of lines around the plot area to white
-    ax.spines['top'].set_color('white')
-    ax.spines['bottom'].set_color('white')
-    ax.spines['left'].set_color('white')
-    ax.spines['right'].set_color('white')
+    fig.update_layout(
+        yaxis_title='Department Name',
+        xaxis_title='Employee Count',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=10, b=10),
+        font=dict(color='white', size=14),
+        xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.2)'),
+        yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.2)'),
+    )
 
-    # Set the color of grid lines to white
-    ax.yaxis.grid(True, color='white', alpha=0.5)
-    ax.xaxis.grid(True, color='white', alpha=0.5)
-
-    # Set the background frame to be transparent
-    ax.set_facecolor('none')
-    fig.patch.set_facecolor('none')
-
-    st.pyplot(fig)
+    st.plotly_chart(fig)
 
 # Relationship
-def relationshipaw(engine):
-    # Query the data from the database
+def relationshipaw(conn):
+    cursor = conn.cursor()
     query = """
-        SELECT OrderQty, LineTotal
-        FROM sales_fact;
+        SELECT pc.EnglishProductCategoryName AS category, 
+               fs.SalesAmount
+        FROM factinternetsales fs
+        JOIN dimproduct dp ON fs.ProductKey = dp.ProductKey
+        JOIN dimproductsubcategory dps ON dp.ProductSubcategoryKey = dps.ProductSubcategoryKey
+        JOIN dimproductcategory pc ON dps.ProductCategoryKey = pc.ProductCategoryKey;
     """
-    df = pd.read_sql(query, engine)
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    df = pd.DataFrame(rows, columns=[desc[0] for desc in cursor.description])
 
     # Create a scatter plot
-    fig, ax = plt.subplots(figsize=(10, 6))
-    ax.scatter(df['OrderQty'], df['LineTotal'], color='gold', alpha=0.25, zorder=2)
-    ax.set_xlabel('Order Quantity', color='white', fontweight='bold', labelpad=20)
-    ax.set_ylabel('Line Total', color='white', fontweight='bold', labelpad=20)
-    ax.tick_params(axis='x', colors='white')
-    ax.tick_params(axis='y', colors='white')
-    for label in (ax.get_xticklabels() + ax.get_yticklabels()):
-        label.set_fontweight('bold')
+    fig = px.scatter(df, x='category', y='SalesAmount', 
+                     labels={'category': 'Product Category', 'SalesAmount': 'Sales Amount'},
+                     color_discrete_sequence=['gold'],
+                     opacity=0.75)
 
-    # Set the color of grid lines to white
-    ax.grid(True, color='white', alpha=0.5)
+    fig.update_layout(
+        xaxis_title='Product Category',
+        yaxis_title='Sales Amount ($US)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=10, b=10),
+        font=dict(color='white', size=14),
+        xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.2)', tickmode='array', tickvals=df['category'].unique()),
+        yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.2)'),
+    )
 
-    # Set the color of lines around the plot area to white
-    ax.spines['top'].set_color('white')
-    ax.spines['bottom'].set_color('white')
-    ax.spines['left'].set_color('white')
-    ax.spines['right'].set_color('white')
-
-    # Set the background frame to be transparent
-    ax.set_facecolor('none')
-    fig.patch.set_facecolor('none')
-    
-    st.pyplot(fig)
+    # Display the chart
+    st.plotly_chart(fig)
 
 # Composition
-def compositionaw(engine):
-    # Query the data from the database
+def compositionaw(conn):
+    cursor = conn.cursor()
     query = """
         SELECT 
-            c.territory,
-            COUNT(sf.customer_key) AS jumlah_pembelian,
-            CONCAT(FORMAT(COUNT(sf.customer_key)/ total_pembelian.total * 100, 2), '%%') AS persentase_pembelian
+            st.SalesTerritoryRegion AS region,
+            COUNT(r.ResellerKey) AS reseller_count
         FROM 
-            sales_fact sf
+            dimreseller r
         JOIN 
-            customer c ON sf.customer_key = c.id
-        CROSS JOIN 
-            (SELECT COUNT(*) AS total FROM sales_fact) AS total_pembelian
+            dimgeography g ON r.GeographyKey = g.GeographyKey
+        JOIN 
+            dimsalesterritory st ON g.SalesTerritoryKey = st.SalesTerritoryKey
         GROUP BY 
-            c.territory;
+            st.SalesTerritoryRegion;
     """
-    df = pd.read_sql(query, engine)
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    df = pd.DataFrame(rows, columns=[desc[0] for desc in cursor.description])
 
-    # Set palette colors
-    colors = ['#ffd404', '#ffd718', '#ffdb2b', '#ffde3f', '#ffe152', '#ffe566', '#ffe87a', '#ffec8d', '#ffefa1', '#fff2b5']
+    # Plotting the pie chart
+    fig = px.pie(df, values='reseller_count', names='region',
+                 hole=0.5,
+                 color_discrete_sequence=['#ffd404', '#ffd718', '#ffdb2b', '#ffde3f', '#ffe152', '#ffe566', '#ffe87a', '#ffec8d', '#ffefa1', '#fff2b5'])
 
-    # Plotting the donut chart
-    fig, ax = plt.subplots(figsize=(8, 8))
-    pie = ax.pie(df['jumlah_pembelian'], labels=df['territory'], autopct='%1.1f%%', startangle=90, pctdistance=0.85, colors=colors, textprops={'fontweight': 'bold'})
-    
-    # Draw a circle at the center of pie to make it a donut chart
-    centre_circle = plt.Circle((0, 0), 0.5, fc='#101414')
-    fig.gca().add_artist(centre_circle)
-    
-    # Set text color
-    for text in pie[1]:
-        text.set_color('#101414' if centre_circle.contains_point(text.get_position()) else 'white')
-    
-    # Equal aspect ratio ensures that pie is drawn as a circle
-    ax.axis('equal')
+    fig.update_traces(textinfo='percent+label', pull=0.05)
+    fig.update_layout(
+        font=dict(color='white', size=12),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)'
+    )
 
-    # Set the background frame to be transparent
-    ax.set_facecolor('none')
-    fig.patch.set_facecolor('none')
-
-    st.pyplot(fig)
+    # Display the chart
+    st.plotly_chart(fig)
 
 # Distribution
-def distributionaw(engine):
-    # Query the data from the database
+def distributionaw(conn):
+    cursor = conn.cursor()
     query = """
         SELECT
-            FLOOR(StockedQty / 100) * 100 AS bin_start,
-            FLOOR(StockedQty / 100) * 100 + 100 AS bin_end,
-            SUM(StockedQty) AS bin_sum
+            dt.CalendarYear,
+            dt.EnglishMonthName,
+            SUM(fis.OrderQuantity) AS OrderQuantity
         FROM
-            production_fact
+            factinternetsales fis
+        JOIN
+            dimtime dt ON fis.OrderDateKey = dt.TimeKey
+        WHERE
+            dt.CalendarYear BETWEEN 2001 AND 2004
         GROUP BY
-            FLOOR(StockedQty / 100)
+            dt.CalendarYear, dt.EnglishMonthName, dt.MonthNumberOfYear
         ORDER BY
-            bin_start;
+            dt.CalendarYear, dt.MonthNumberOfYear;
     """
-    df = pd.read_sql(query, engine)
+    cursor.execute(query)
+    rows = cursor.fetchall()
+    df = pd.DataFrame(rows, columns=[desc[0] for desc in cursor.description])
 
-    # Create interval labels
-    df['interval'] = df.apply(lambda row: f"{int(row['bin_start'])}-{int(row['bin_end'])}", axis=1)
-    
-    # Plot the histogram using Plotly
+    # Create a new column to combine year and month
+    df['YearMonth'] = df['CalendarYear'].astype(str) + ' ' + df['EnglishMonthName']
+
+    # Plot the bar chart using Plotly
     fig = go.Figure(data=[go.Bar(
-        x=df['interval'], 
-        y=df['bin_sum'],
+        x=df['YearMonth'], 
+        y=df['OrderQuantity'],
         marker_color='gold'
     )])
     
     fig.update_layout(
-        xaxis_title='Stocked Quantity Interval',
-        yaxis_title='Total Quantity',
+        xaxis_title='Month',
+        yaxis_title='Order Quantity',
         xaxis=dict(
-            rangeslider=dict(
-                visible=True
-            ),
-            tickangle=-45
+            tickangle=-45,
+            tickmode='array',
+            tickvals=df['YearMonth']
         ),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=10, b=10),
         font=dict(
-        weight="bold"
-    )
+            color='white',
+            size=12,
+            weight='bold'
+        )
     )
     
     st.plotly_chart(fig)
 
 
 # Comparison
+def comparisonimdb(data):
+    # Count the number of movies for each label
+    count_by_label = data['label'].value_counts().reset_index()
+    count_by_label.columns = ['label', 'count']
+
+    # Set palette colors
+    colors = ['#ffd404', '#ffd718', '#ffdb2b', '#ffde3f', '#ffe152', '#ffe566', '#ffe87a', '#ffec8d', '#ffefa1', '#fff2b5']
+
+    # Create the bar chart using Plotly
+    fig = px.bar(count_by_label, x='label', y='count', 
+                 labels={'label': 'Label', 'count': 'Number of Movies'},
+                 color='label', color_discrete_sequence=colors)
+
+    fig.update_layout(
+        xaxis=dict(title='Label', color='white', tickfont=dict(color='white')),
+        yaxis=dict(title='Number of Movies', color='white', tickfont=dict(color='white')),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=10, b=10),
+        font=dict(color='white', size=12),
+    )
+
+    # Display the chart
+    st.plotly_chart(fig)
+
 # Relationship
+def relationshipimdb(data):
+    # Convert release_year to integer and rating to float
+    data['release_year'] = data['release_year'].astype(int)
+    data['rating'] = data['rating'] / 10.0
+
+    # Create scatter plot
+    fig = px.scatter(data, x='release_year', y='rating', 
+                     labels={'release_year': 'Release Year', 'rating': 'Rating'},
+                     color_discrete_sequence=['gold'],
+                     opacity=0.5)
+
+    fig.update_layout(
+        xaxis_title='Release Year',
+        yaxis_title='Rating',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=10, b=10),
+        font=dict(color='white', size=14),
+        xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.2)'),
+        yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.2)'),
+    )
+
+    # Display the chart
+    st.plotly_chart(fig)
+
 # Composition
+def compositionimdb(data):
+    # Hitung total budget untuk setiap label
+    total_budget_by_label = data.groupby('label')['budget'].sum()
+
+    # Hitung total budget keseluruhan
+    total_budget_all = data['budget'].sum()
+
+    # Hitung proporsi untuk setiap label
+    proportions = total_budget_by_label / total_budget_all
+
+    # Urutkan proporsi dari yang terbesar ke yang terkecil
+    proportions_sorted = proportions.sort_values(ascending=False)
+
+    # Set palette colors
+    colors = ['#ffd404', '#ffd718', '#ffdb2b', '#ffde3f', '#ffe152', '#ffe566', '#ffe87a', '#ffec8d']
+
+    # Buat pie chart
+    fig = go.Figure(data=[go.Pie(
+        labels=proportions_sorted.index,
+        values=proportions_sorted.values,
+        hole=0.5,
+        textinfo='percent+label',
+        marker=dict(colors=colors),
+    )])
+
+    fig.update_layout(
+        font=dict(color='white', size=12),
+        margin=dict(t=10, b=10),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+    )
+
+    # Tampilkan pie chart
+    st.plotly_chart(fig)
+
 # Distribution
+def distributionimdb(data):
+    # Hitung distribusi rating
+    rating_distribution = data['rating'].value_counts().sort_index()
+
+    # Buat line chart tanpa marker
+    fig = go.Figure(data=go.Scatter(x=rating_distribution.index, y=rating_distribution.values, 
+                                     mode='lines', line=dict(color='gold', width=2)))
+
+    fig.update_layout(
+        xaxis_title='Rating',
+        yaxis_title='Frequency',
+        xaxis=dict(color='white', gridcolor='rgba(255,255,255,0.2)', showgrid=True),
+        yaxis=dict(color='white', gridcolor='rgba(255,255,255,0.2)', showgrid=True),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        margin=dict(t=10, b=10),
+        font=dict(color='white', size=14),
+    )
+
+    # Tampilkan line chart
+    st.plotly_chart(fig)
 
 
-# Function to perform text-to-speech and translation
-# def perform_tts_and_translation(text, target_language):
-#     st.write("Terjemahan dalam bahasa target:")
-#     hasil = ts.translate_text(text, to_language=target_language, translator='google')
-#     st.write(hasil)
-    
-#     tts_translated = gTTS(text=hasil, lang=target_language)
-#     tts_translated.save("translated.mp3")
-#     st.audio("translated.mp3", format="audio/mp3")
+# Function to perform text-to-speech
+def perform_tts(text, filename):
+    # Periksa apakah file dengan nama yang sama sudah ada
+    if os.path.exists(filename):
+        os.remove(filename)  # Hapus file jika sudah ada
+
+    # Buat ucapan dan simpan ke file
+    tts = gTTS(text=text, lang='id')
+    tts.save(filename)
+
+    # Tampilkan audio
+    st.audio(filename, format="audio/mp3")
 
 # Main Streamlit app
 def main():
-    st.write("Adventure Works Dataset & IMDB Data Scrapping Visualization")
-    st.write("By Fariz - 21082010156")
-    st.write("Adventure Works Dataset")
+    st.markdown("<h1 style='text-align: center; color: white;'>Adventure Works Dataset & IMDB Data Scrapping Visualization</h1>", unsafe_allow_html=True)
+    st.markdown("<h4 style='text-align: center; color: white;'>By Fariz - 21082010156</h4>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: white;'>Adventure Works Dataset</h2>", unsafe_allow_html=True)
 
-    st.title('Usage Count of Shipping Methods')
-    st.write('Comparison - Column Chart Visualization')
-    comparisonaw(engine)
+    # Add custom CSS to adjust column width
+    st.markdown(
+        """
+        <style>
+        .block-container {
+            max-width: 100%;
+            margin: auto;
+        }
+        .element-container {
+            width: 100% !important;
+        }
+        .stColumn > div {
+            padding: 1em;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
-    st.title('Scatter Plot of Order Quantity and Line Total')
-    st.write('Relationship - Scatter Plot Visualization')
-    relationshipaw(engine)
+    # Divide the screen into 2 columns
+    col1, col2 = st.columns(2)
 
-    st.title('Purchase Proportions by Region')
-    st.write('Composition - Donut Chart Visualization')
-    compositionaw(engine)
+    with col1:
+        st.markdown('<h3>Employee Count per Department</h3>', unsafe_allow_html=True)
+        st.write('Comparison - Column Chart Visualization')
+        comparisonaw(conn)
+        explanation1 = "Visualisasi ini menampilkan perbandingan jumlah karyawan (Employee Count) di setiap departemen. Jumlah karyawan dapat dilihat dari panjang batang pada grafik, dimana departemen dengan batang paling panjang memiliki jumlah karyawan terbanyak, sementara departemen dengan batang yang lebih pendek memiliki jumlah karyawan yang lebih sedikit. Analisis ini dapat membantu dalam memahami distribusi penyebaran tenaga kerja di berbagai departemen perusahaan."
+        st.write("Penjelasan:")
+        st.write(explanation1)
+        if st.button("Text to Speech Comparison AW"):
+            perform_tts(explanation1, "comparisonaw.mp3")
 
-    st.title('Stocked Quantity Distribution')
-    st.write('Distribution - Column Histogram Visualization')
-    distributionaw(engine)
+        st.markdown('<h3>Reseller Place by Region</h3>', unsafe_allow_html=True)
+        st.write('Composition - Donut Chart Visualization')
+        compositionaw(conn)
+        explanation2 = "Visualisasi ini menampilkan proporsi jumlah reseller untuk setiap wilayah (Sales Territory Region). Setiap bagian donat menunjukkan persentase jumlah reseller dalam wilayah tersebut terhadap total jumlah reseller di seluruh wilayah. Donat yang lebih besar menunjukkan wilayah dengan lebih banyak reseller, sementara donat yang lebih kecil menandakan wilayah dengan jumlah reseller yang lebih sedikit."
+        st.write("Penjelasan:")
+        st.write(explanation2)
+        if st.button("Text to Speech Composition AW"):
+            perform_tts(explanation2, "compositionaw.mp3")
 
-    st.write("IMDB Top 250 Movies By Popularity")
+    with col2:
+        st.markdown('<h3>Scatter Plot of Sales Amount by Product Category</h3>', unsafe_allow_html=True)
+        st.write('Relationship - Scatter Plot Visualization')
+        relationshipaw(conn)
+        explanation3 = "Visualisasi ini menampilkan perbandingan jumlah penjualan (Sales Amount) untuk setiap kategori produk (Product Category). Sebaran data menunjukkan bagaimana distribusi penjualan terdistribusi di antara berbagai kategori produk, yang ditandai oleh ketebalan titik atau bulatan pada plot. Sebaran data yang lebih tebal menunjukkan jumlah penjualan yang lebih besar untuk kategori produk tersebut, sementara sebaran data yang lebih tipis menandakan jumlah penjualan yang lebih sedikit."
+        st.write("Penjelasan:")
+        st.write(explanation3)
+        if st.button("Text to Speech Relationship AW"):
+            perform_tts(explanation3, "relationshipaw.mp3")
 
-    
-    # text = st.text_area("Masukkan teks yang ingin diucapkan dan diterjemahkan", 
-    #                     "This company was founded in 2010 by the infamous movie star, Graeme Alexander. Currently, the company worths USD 1 billion according to Forbes report in 2023. What an achievement in just 13 years.")
-    
-    # target_language = st.selectbox("Pilih bahasa target untuk menerjemahkan", 
-    #                                ["id", "fr", "es", "zh-CN"])
-    
-    # if st.button("Proses"):
-    #     perform_tts_and_translation(text, target_language)
+        st.markdown('<h3>Order Quantity Distribution by Month</h3>', unsafe_allow_html=True)
+        st.write('Distribution - Column Histogram Visualization')
+        distributionaw(conn)
+        explanation4 = "Visualisasi ini menampilkan distribusi jumlah pesanan (Order Quantity) berdasarkan bulan dari tahun 2001 hingga 2004. Setiap batang menunjukkan jumlah pesanan pada bulan tertentu, dengan sumbu x menunjukkan bulan dan sumbu y menunjukkan jumlah pesanan. Visualisasi ini membantu dalam melihat tren atau pola pesanan dari waktu ke waktu."
+        st.write("Penjelasan:")
+        st.write(explanation4)
+        if st.button("Text to Speech Distribution AW"):
+            perform_tts(explanation4, "distributionaw.mp3")
+
+    st.markdown("<h2 style='text-align: center; color: white;'>IMDB Top 250 Movies By Popularity</h2>", unsafe_allow_html=True)
+
+    col3, col4 = st.columns(2)
+
+    with col3:
+        st.markdown('<h3>Number of Movies by Their Label</h3>', unsafe_allow_html=True)
+        st.write('Comparison - Column Chart Visualization')
+        comparisonimdb(data)
+        explanation5 = "Visualisasi ini menampilkan jumlah film untuk setiap label. Setiap batang menunjukkan jumlah film dalam kategori tertentu, sementara sumbu x menunjukkan label dan sumbu y menunjukkan jumlah film. Visualisasi ini membantu dalam memahami distribusi film berdasarkan labelnya."
+        st.write("Penjelasan:")
+        st.write(explanation5)
+        if st.button("Text to Speech Comparison IMDB"):
+            perform_tts(explanation5, "comparisonimdb.mp3")
+
+        st.markdown('<h3>Proportion of Total Budget by Label</h3>', unsafe_allow_html=True)
+        st.write('Composition - Donut Chart Visualization')
+        compositionimdb(data)
+        explanation6 = "Visualisasi ini menampilkan proporsi total anggaran film yang dialokasikan untuk setiap label. Setiap bagian pada diagram lingkaran menunjukkan persentase dari total anggaran film yang dikelompokkan berdasarkan labelnya. Visualisasi ini membantu dalam memperkirakan jumlah anggaran film tergantung labelnya"
+        st.write("Penjelasan:")
+        st.write(explanation6)
+        if st.button("Text to Speech Composition IMDB"):
+            perform_tts(explanation6, "compositionimdb.mp3")
+
+    with col4:
+        st.markdown('<h3>Scatter Plot of Release Year and Rating</h3>', unsafe_allow_html=True)
+        st.write('Relationship - Scatter Plot Visualization')
+        relationshipimdb(data)
+        explanation7 = "Visualisasi ini menampilkan hubungan antara tahun rilis dan rating film. Setiap titik pada plot menunjukkan rating film pada tahun tertentu. Visualisasi ini membantu dalam memahami tren perubahan rating film seiring waktu dan traffic kepadatan di tiap jangka waktunya."
+        st.write("Penjelasan:")
+        st.write(explanation7)
+        if st.button("Text to Speech Relationship IMDB"):
+            perform_tts(explanation7, "relationshipimdb.mp3")
+
+        st.markdown('<h3>Film Ratings Distribution Histogram</h3>', unsafe_allow_html=True)
+        st.write('Distribution - Line Histogram Visualization')
+        distributionimdb(data)
+        explanation8 = "Visualisasi ini menampilkan distribusi rating film dalam bentuk histogram garis. Sumbu x menunjukkan rating film, sementara sumbu y menunjukkan frekuensi kemunculan rating tersebut. Visualisasi ini membantu dalam memahami sebaran rating film secara keseluruhan dan menemukan tren atau pola dari rating film."
+        st.write("Penjelasan:")
+        st.write(explanation8)
+        if st.button("Text to Speech Distribution IMDB"):
+            perform_tts(explanation8, "distributionimdb.mp3")
 
 # Run the app
 if __name__ == "__main__":

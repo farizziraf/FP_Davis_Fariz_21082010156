@@ -1,16 +1,5 @@
 streamlit
 pandas
 plotly
-prophet
-matplotlib
-seaborn
-yfinance
-pandas-datareader
-numpy
-datetime
-openpyxl
-pymysql
-SQLAlchemy
-scipy
 gtts
-translators==5.9.2
+mysql-connector-python

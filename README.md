@@ -24,12 +24,14 @@ This project focuses on data visualization using Python. It involves two main ta
 
 ## Project Structure
 The project structure is as follows:
+```bash
 .
 ├── dataset
 │   ├── imdbscrap.csv
 ├── app.py
 ├── requirements.txt
 └── README.md
+```
 
 ## Requirements
 - Python

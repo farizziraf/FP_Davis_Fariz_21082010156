@@ -41,7 +41,7 @@ The project structure is as follows:
 
 ## Requirements
 - Python
-- Mysql (XAMPP)
+- MySQL (XAMPP)
 
 ## Setup
 

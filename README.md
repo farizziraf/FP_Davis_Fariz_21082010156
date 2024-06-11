@@ -42,11 +42,6 @@ The project structure is as follows:
 ## Requirements
 - Python
 - Mysql (XAMPP)
-- Streamlit
-- Pandas
-- Plotly
-- Gtts
-- Mysql-connector-python
 
 ## Setup
 

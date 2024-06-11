@@ -390,7 +390,7 @@ def main():
         st.markdown('<h3>Proportion of Total Budget by Label</h3>', unsafe_allow_html=True)
         st.write('Composition - Donut Chart Visualization')
         compositionimdb(data)
-        explanation6 = "Visualisasi ini menampilkan proporsi total anggaran film yang dialokasikan untuk setiap label. Setiap bagian pada diagram lingkaran menunjukkan persentase dari total anggaran film yang dikelompokkan berdasarkan labelnya. Visualisasi ini membantu dalam memperkirakan jumlah anggaran film tergantung labelnya"
+        explanation6 = "Visualisasi ini menampilkan proporsi total anggaran film yang dialokasikan untuk setiap label. Setiap bagian pada diagram lingkaran menunjukkan persentase dari total anggaran film yang dikelompokkan berdasarkan labelnya. Visualisasi ini membantu dalam memperkirakan jumlah anggaran film tergantung labelnya."
         st.write("Penjelasan:")
         st.write(explanation6)
         if st.button("Text to Speech Composition IMDB"):

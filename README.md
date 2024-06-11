@@ -6,8 +6,11 @@
   - [Project Introduction](#project-introduction)
 - [Project Structure](#project-structure)
 - [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
+- [Setup](#setup)
+  - [Clone Repository](#clone-repository)
+  - [Import Database](#import-database)
+  - [.streamlit/secret.toml](#secretsecretstoml)
+  - [Usage](#usage)
 - [Datasets](#datasets)
 - [Streamlit Dashboard](#streamlit-dashboard)
 - [Author](#author)
@@ -26,7 +29,10 @@ This project focuses on data visualization using Python. It involves two main ta
 The project structure is as follows:
 ```bash
 .
+├── .streamlit (.gitignore)
+│   ├── secrets.toml (.gitignore)
 ├── dataset
+│   ├── aw.sql
 │   ├── imdbscrap.csv
 ├── app.py
 ├── requirements.txt
@@ -35,13 +41,16 @@ The project structure is as follows:
 
 ## Requirements
 - Python
+- Mysql (XAMPP)
 - Streamlit
 - Pandas
 - Plotly
 - Gtts
 - Mysql-connector-python
 
-## Installation
+## Setup
+
+### Clone Repository
 1. Clone the repository:
     ```sh
     git clone https://github.com/farizziraf/FP_Davis_Fariz_21082010156.git
@@ -52,12 +61,39 @@ The project structure is as follows:
     cd FP_Davis_Fariz_21082010156
     ```
 
-3. Install the required packages:
+### Import Database
+1. Install XAMPP and start MySQL server.
+2. Import the AdventureWork database file 'aw.sql'.
+
+### .secret/secrets.toml
+1. Create a `.secret` directory in the root of the project:
+    ```sh
+    mkdir .secret
+    ```
+
+2. Create a `secrets.toml` file inside the `.secret` directory:
+    ```sh
+    touch .secret/secrets.toml
+    ```
+
+3. Add your secret configurations to the `secrets.toml` file.
+    Example:
+    ```toml
+    [database]
+    host = "your_host"
+    port = "your_port"
+    database = "your_database"
+    username = "your_username"
+    password = "your_password"
+    ```
+
+### Usage
+1. Install the required packages:
     ```sh
     pip install -r requirements.txt
     ```
 
-4. Run the project:
+2. Run the project:
     ```sh
     streamlit run app.py
     ```
@@ -73,12 +109,12 @@ The Streamlit dashboard contains visualizations of both the AdventureWork datase
 - Composition
 - Distribution
 
+Each segment includes explanations related to the visualizations, along with a text-to-speech feature that reads out the explanations.
+
 You can view the Streamlit dashboard for this project at the following link:
 [Streamlit Dashboard](https://fp-davis-fariz-21082010156.streamlit.app/)
 
-Each segment includes explanations related to the visualizations, along with a text-to-speech feature that reads out the explanations.
-
 ## Author
-Nama: Fariz
-NPM: 21082010156
+Nama: Fariz<br>
+NPM: 21082010156<br>
 Tugas Besar Data Visualisasi Par B

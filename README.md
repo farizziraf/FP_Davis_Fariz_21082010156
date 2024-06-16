@@ -109,6 +109,8 @@ Each segment includes explanations related to the visualizations, along with a t
 You can view the Streamlit dashboard for this project at the following link:
 [Streamlit Dashboard](https://fp-davis-fariz-21082010156.streamlit.app/)
 
+If the Streamlit dashboard encounters errors, it may be due to the database server not being active.
+
 ## Author
 Nama: Fariz<br>
 NPM: 21082010156<br>

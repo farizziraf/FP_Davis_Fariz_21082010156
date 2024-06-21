@@ -81,7 +81,7 @@ def relationshipaw(conn):
 
     fig.update_layout(
         xaxis_title='Product Category',
-        yaxis_title='Sales Amount ($US)',
+        yaxis_title='Sales Amount (US$)',
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         margin=dict(t=10, b=10),
@@ -339,7 +339,7 @@ def main():
         st.markdown('<h3>Employee Count per Department</h3>', unsafe_allow_html=True)
         st.write('Comparison - Column Chart Visualization')
         comparisonaw(conn)
-        explanation1 = "Visualisasi ini menampilkan perbandingan jumlah karyawan (Employee Count) di setiap departemen. Jumlah karyawan dapat dilihat dari panjang batang pada grafik, dimana departemen dengan batang paling panjang memiliki jumlah karyawan terbanyak, sementara departemen dengan batang yang lebih pendek memiliki jumlah karyawan yang lebih sedikit. Analisis ini dapat membantu dalam memahami distribusi penyebaran tenaga kerja di berbagai departemen perusahaan."
+        explanation1 = "Visualisasi ini menampilkan perbandingan jumlah karyawan (Employee Count) di setiap departemen. Jumlah karyawan dapat dilihat dari panjang batang pada grafik, di mana departemen dengan batang paling panjang memiliki jumlah karyawan terbanyak, sementara departemen dengan batang yang lebih pendek memiliki jumlah karyawan lebih sedikit. Analisis ini membantu dalam memahami distribusi tenaga kerja di berbagai departemen perusahaan. Terlihat bahwa jumlah karyawan terbanyak berada pada departemen Production, sedangkan jumlah karyawan paling sedikit berada pada departemen Executive. Jumlah karyawan yang besar di departemen Production berbanding lurus dengan fokus perusahaan yang bergerak di bidang produksi sepeda (Cycles). Sementara itu, departemen Executive adalah departemen dengan hierarki tertinggi di antara departemen lainnya, yang secara logis memiliki jumlah karyawan lebih sedikit karena semakin tinggi hierarki, jumlah karyawan cenderung semakin mengerucut atau sedikit."
         st.write("Penjelasan:")
         st.write(explanation1)
         if st.button("Text to Speech Comparison AW"):
@@ -348,7 +348,7 @@ def main():
         st.markdown('<h3>Reseller Place by Region</h3>', unsafe_allow_html=True)
         st.write('Composition - Donut Chart Visualization')
         compositionaw(conn)
-        explanation2 = "Visualisasi ini menampilkan proporsi jumlah reseller untuk setiap wilayah (Sales Territory Region). Setiap bagian donat menunjukkan persentase jumlah reseller dalam wilayah tersebut terhadap total jumlah reseller di seluruh wilayah. Donat yang lebih besar menunjukkan wilayah dengan lebih banyak reseller, sementara donat yang lebih kecil menandakan wilayah dengan jumlah reseller yang lebih sedikit."
+        explanation2 = "Visualisasi ini menampilkan proporsi jumlah reseller untuk setiap wilayah (Sales Territory Region). Setiap bagian pada grafik donat menunjukkan persentase jumlah reseller dalam wilayah tersebut terhadap total jumlah reseller di seluruh wilayah. Potongan donat yang lebih besar menunjukkan wilayah dengan lebih banyak reseller, sementara potongan donat yang lebih kecil menandakan wilayah dengan jumlah reseller yang lebih sedikit. Terlihat bahwa proporsi atau sebaran reseller di setiap wilayah tidak ada yang dominan atau condong pada satu wilayah saja. Proporsi reseller di setiap wilayah berkisar antara 5,71 persen hingga 18,7 persen. Hal ini menunjukkan distribusi yang relatif merata di antara berbagai wilayah."
         st.write("Penjelasan:")
         st.write(explanation2)
         if st.button("Text to Speech Composition AW"):
@@ -358,7 +358,7 @@ def main():
         st.markdown('<h3>Scatter Plot of Sales Amount by Product Category</h3>', unsafe_allow_html=True)
         st.write('Relationship - Scatter Plot Visualization')
         relationshipaw(conn)
-        explanation3 = "Visualisasi ini menampilkan perbandingan jumlah penjualan (Sales Amount) untuk setiap kategori produk (Product Category). Sebaran data menunjukkan bagaimana distribusi penjualan terdistribusi di antara berbagai kategori produk, yang ditandai oleh ketebalan titik atau bulatan pada plot. Sebaran data yang lebih tebal menunjukkan jumlah penjualan yang lebih besar untuk kategori produk tersebut, sementara sebaran data yang lebih tipis menandakan jumlah penjualan yang lebih sedikit."
+        explanation3 = "Visualisasi ini menampilkan perbandingan jumlah penjualan (Sales Amount) untuk setiap kategori produk (Product Category). Sebaran data menunjukkan bagaimana penjualan terdistribusi di antara berbagai kategori produk, yang ditandai oleh ketebalan titik atau bulatan pada plot. Terlihat bahwa sebaran jumlah penjualan dari tiap kategori produk berbeda-beda. Pada kategori Bikes, sebaran jumlah penjualannya berada di kisaran 540 hingga 3578 USD. Pada kategori Clothing, sebaran jumlah penjualannya berada di kisaran 9 hingga 70 USD. Sedangkan pada kategori Accessories, sebaran jumlah penjualannya berada di kisaran 2 hingga 159 USD. Hal ini bisa terjadi karena perusahaan ini berfokus pada penjualan sepeda (Cycles), sehingga jumlah penjualan pada kategori produk Bikes lebih tinggi dibandingkan dengan kategori produk lainnya. Selain itu, kisaran harga Bikes lebih mahal daripada Clothing dan Accessories, yang juga mempengaruhi perbedaan jumlah penjualan di setiap kategori produk."
         st.write("Penjelasan:")
         st.write(explanation3)
         if st.button("Text to Speech Relationship AW"):
@@ -367,7 +367,7 @@ def main():
         st.markdown('<h3>Order Quantity Distribution by Month</h3>', unsafe_allow_html=True)
         st.write('Distribution - Column Histogram Visualization')
         distributionaw(conn)
-        explanation4 = "Visualisasi ini menampilkan distribusi jumlah pesanan (Order Quantity) berdasarkan bulan dari tahun 2001 hingga 2004. Setiap batang menunjukkan jumlah pesanan pada bulan tertentu, dengan sumbu x menunjukkan bulan dan sumbu y menunjukkan jumlah pesanan. Visualisasi ini membantu dalam melihat tren atau pola pesanan dari waktu ke waktu."
+        explanation4 = "Visualisasi ini menampilkan distribusi jumlah pesanan (Order Quantity) berdasarkan bulan dari tahun 2001 hingga 2004. Setiap batang menunjukkan jumlah pesanan pada bulan tertentu, dengan sumbu x menunjukkan bulan dan sumbu y menunjukkan jumlah pesanan. Visualisasi ini membantu dalam melihat tren atau pola pesanan dari waktu ke waktu. Terlihat bahwa dari tahun 2001 hingga 2004, distribusi jumlah pesanan menunjukkan kestabilan selama dua tahun, dari Juli 2001 hingga Juni 2003. Kemudian, ada tren kenaikan yang signifikan mulai Juli 2003 dan seterusnya. Kenaikan jumlah pesanan yang drastis terlihat mulai dari bulan Juli 2003 hingga Juni 2004, di mana jumlah pesanan terus meningkat setiap bulannya."
         st.write("Penjelasan:")
         st.write(explanation4)
         if st.button("Text to Speech Distribution AW"):
@@ -381,7 +381,7 @@ def main():
         st.markdown('<h3>Number of Movies by Their Label</h3>', unsafe_allow_html=True)
         st.write('Comparison - Column Chart Visualization')
         comparisonimdb(data)
-        explanation5 = "Visualisasi ini menampilkan jumlah film untuk setiap label. Setiap batang menunjukkan jumlah film dalam kategori tertentu, sementara sumbu x menunjukkan label dan sumbu y menunjukkan jumlah film. Visualisasi ini membantu dalam memahami distribusi film berdasarkan labelnya."
+        explanation5 = "Visualisasi ini menampilkan jumlah film untuk setiap label. Setiap batang menunjukkan jumlah film dalam kategori tertentu, dengan sumbu x menunjukkan label dan sumbu y menunjukkan jumlah film. Visualisasi ini membantu dalam memahami distribusi film berdasarkan labelnya. Terlihat bahwa dalam daftar 250 film terpopuler, jumlah film terbanyak ada pada label R, sementara jumlah film tersedikit ada pada label NC-17. Hal ini bisa terjadi karena film berlabel R memiliki banyak peminat atau sangat populer di kalangan masyarakat. Terdapat 101 film berlabel R yang masuk dalam daftar 250 film terpopuler disebabkan oleh batasan usia yang yang tidak terlalu ketat, dimana penonton dibawah 17 tahun masih bisa menonton tapi harus didampingi oleh orangtua atau yang lebih dewasa. Di sisi lain, hanya ada satu film berlabel NC-17 yang masuk dalam daftar tersebut. Ini mungkin disebabkan oleh batasan usia yang ketat, di mana penonton di bawah 17 tahun dilarang menonton film berlabel NC-17, sehingga sulit mendapatkan pasar yang luas."
         st.write("Penjelasan:")
         st.write(explanation5)
         if st.button("Text to Speech Comparison IMDB"):
@@ -390,7 +390,7 @@ def main():
         st.markdown('<h3>Proportion of Total Budget by Label</h3>', unsafe_allow_html=True)
         st.write('Composition - Donut Chart Visualization')
         compositionimdb(data)
-        explanation6 = "Visualisasi ini menampilkan proporsi total anggaran film yang dialokasikan untuk setiap label. Setiap bagian pada diagram lingkaran menunjukkan persentase dari total anggaran film yang dikelompokkan berdasarkan labelnya. Visualisasi ini membantu dalam memperkirakan jumlah anggaran film tergantung labelnya."
+        explanation6 = "Visualisasi ini menampilkan proporsi total anggaran film yang dialokasikan untuk setiap label. Setiap bagian atau potongan pada diagram donat menunjukkan persentase dari total anggaran film yang dikelompokkan berdasarkan labelnya. Terlihat bahwa proporsi total anggaran film yang dialokasikan untuk setiap label berbeda-beda, berkisar antara 0,0000102 persen hingga 36,2 persen. Proporsi anggaran yang besar diperuntukkan untuk pembuatan film dengan label PG-13 dan R, masing-masing sebesar 36,2 persen untuk label PG-13 dan 35,5 persen untuk label R. Hal ini disebabkan oleh tingginya minat pasar terhadap film dengan rating tersebut, sehingga banyak film dengan label PG-13 dan R dibuat dengan anggaran yang besar. Di sisi lain, sedikit anggaran untuk film dengan label Passed, NC-17, dan Approved, masing-masing hanya 0,0000102 persen untuk label Passed, 0,0459 persen untuk label NC-17, dan 0,373 persen untuk label Approved. Hal ini disebabkan oleh sedikitnya film dengan label tersebut yang masuk dalam daftar TOP 250 Movies terpopuler dan kurangnya pasar yang besar untuk jenis film ini."
         st.write("Penjelasan:")
         st.write(explanation6)
         if st.button("Text to Speech Composition IMDB"):
@@ -400,7 +400,7 @@ def main():
         st.markdown('<h3>Scatter Plot of Release Year and Rating</h3>', unsafe_allow_html=True)
         st.write('Relationship - Scatter Plot Visualization')
         relationshipimdb(data)
-        explanation7 = "Visualisasi ini menampilkan hubungan antara tahun rilis dan rating film. Setiap titik pada plot menunjukkan rating film pada tahun tertentu. Visualisasi ini membantu dalam memahami tren perubahan rating film seiring waktu dan traffic kepadatan di tiap jangka waktunya."
+        explanation7 = "Visualisasi ini menampilkan hubungan antara tahun rilis dan rating film. Setiap titik pada plot menunjukkan rating film pada tahun tertentu. Visualisasi ini membantu dalam memahami tren perubahan rating film seiring waktu dan trafik kepadatan di tiap jangka waktu. Terlihat bahwa trafik atau aktivitas terpadat terjadi pada film-film yang dirilis antara tahun 1990-an hingga 2010-an. Hal ini disebabkan oleh tingkat kepopuleran tinggi dari film-film yang dirilis dalam periode tersebut. Masyarakat kemungkinan besar akrab dengan atau pernah menonton film-film yang rilis pada tahun-tahun tersebut. Selain itu, pasar film global pada periode ini sangat luas dan diminati oleh banyak orang. Yang dimana industri film mengalami ledakan popularitas global dengan kemunculan film-film blockbuster yang memikat perhatian publik secara luas. Ini juga merupakan masa di mana teknologi digital dan internet mulai memengaruhi cara film diproduksi, didistribusikan, dan dikonsumsi oleh penonton di seluruh dunia."
         st.write("Penjelasan:")
         st.write(explanation7)
         if st.button("Text to Speech Relationship IMDB"):
@@ -409,7 +409,7 @@ def main():
         st.markdown('<h3>Film Ratings Distribution Histogram</h3>', unsafe_allow_html=True)
         st.write('Distribution - Line Histogram Visualization')
         distributionimdb(data)
-        explanation8 = "Visualisasi ini menampilkan distribusi rating film dalam bentuk histogram garis. Sumbu x menunjukkan rating film, sementara sumbu y menunjukkan frekuensi kemunculan rating tersebut. Visualisasi ini membantu dalam memahami sebaran rating film secara keseluruhan dan menemukan tren atau pola dari rating film."
+        explanation8 = "Visualisasi ini menampilkan distribusi rating film dalam bentuk histogram garis. Sumbu x menunjukkan rating film, sementara sumbu y menunjukkan frekuensi kemunculan rating tersebut. Visualisasi ini membantu dalam memahami sebaran rating film secara keseluruhan dan menemukan tren atau pola dari rating film. Terlihat bahwa film-film yang masuk dalam TOP 250 Movies terpopuler memiliki rating antara 8 hingga 9,2. Rating yang paling banyak ditemui adalah 8,1, dengan jumlah 71 film. Untuk rating di atas 8,1, jumlah film secara bertahap menurun. Hal ini menunjukkan bahwa film-film dengan rating tinggi cenderung mendominasi dalam daftar TOP 250 Movies terpopuler. Namun, perlu dicatat bahwa rating film tidak selalu mencerminkan jumlah orang yang memberikan ulasan. Sebagai contoh, sebuah film dengan rating 8,5 mungkin hanya didasarkan pada sedikit ulasan yang memberikan nilai tinggi, sementara film dengan rating 7,5 bisa jadi memiliki lebih banyak ulasan yang memberikan skor lebih rendah. Oleh karena itu, rating tinggi tidak selalu menjamin bahwa film tersebut populer secara luas oleh masyarakat atau memiliki banyak penggemar."
         st.write("Penjelasan:")
         st.write(explanation8)
         if st.button("Text to Speech Distribution IMDB"):

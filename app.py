@@ -38,7 +38,7 @@ def comparisonaw(conn):
     rows = cursor.fetchall()
     df = pd.DataFrame(rows, columns=[desc[0] for desc in cursor.description])
 
-    # Mengisi nilai yang hilang dengan 0
+    # Fill missing values with 0
     df['employee_count'] = df['employee_count'].fillna(0)
     
     fig = px.bar(df, y='DepartmentName', x='employee_count', 
@@ -236,22 +236,22 @@ def relationshipimdb(data):
 
 # Composition
 def compositionimdb(data):
-    # Hitung total budget untuk setiap label
+    # Calculate total budget for each label
     total_budget_by_label = data.groupby('label')['budget'].sum()
 
-    # Hitung total budget keseluruhan
+    # Calculate total budget overall
     total_budget_all = data['budget'].sum()
 
-    # Hitung proporsi untuk setiap label
+    # Calculate proportions for each label
     proportions = total_budget_by_label / total_budget_all
 
-    # Urutkan proporsi dari yang terbesar ke yang terkecil
+    # Sort proportions from largest to smallest
     proportions_sorted = proportions.sort_values(ascending=False)
 
     # Set palette colors
     colors = ['#ffd404', '#ffd718', '#ffdb2b', '#ffde3f', '#ffe152', '#ffe566', '#ffe87a', '#ffec8d']
 
-    # Buat pie chart
+    # Create pie chart
     fig = go.Figure(data=[go.Pie(
         labels=proportions_sorted.index,
         values=proportions_sorted.values,
@@ -267,17 +267,17 @@ def compositionimdb(data):
         paper_bgcolor='rgba(0,0,0,0)',
     )
 
-    # Tampilkan pie chart
+    # Display pie chart using Streamlit
     st.plotly_chart(fig)
 
 # Distribution
 def distributionimdb(data):
-    # Hitung distribusi rating
+    # Calculate rating distribution
     rating_distribution = data['rating'].value_counts().sort_index()
 
-    # Buat line chart tanpa marker
+    # Create line chart without markers
     fig = go.Figure(data=go.Scatter(x=rating_distribution.index, y=rating_distribution.values, 
-                                     mode='lines', line=dict(color='gold', width=2)))
+                                    mode='lines', line=dict(color='gold', width=2)))
 
     fig.update_layout(
         xaxis_title='Rating',
@@ -290,21 +290,21 @@ def distributionimdb(data):
         font=dict(color='white', size=14),
     )
 
-    # Tampilkan line chart
+    # Display line chart using Streamlit
     st.plotly_chart(fig)
 
 
 # Function to perform text-to-speech
 def perform_tts(text, filename):
-    # Periksa apakah file dengan nama yang sama sudah ada
+    # Check if a file with the same name already exists
     if os.path.exists(filename):
-        os.remove(filename)  # Hapus file jika sudah ada
+        os.remove(filename)  # Remove the file if it already exists
 
-    # Buat ucapan dan simpan ke file
-    tts = gTTS(text=text, lang='id')
+    # Create speech synthesis and save it to a file
+    tts = gTTS(text=text, lang='id')  # 'id' is for Indonesian language
     tts.save(filename)
 
-    # Tampilkan audio
+    # Display the audio player to play the saved audio file
     st.audio(filename, format="audio/mp3")
 
 # Main Streamlit app
